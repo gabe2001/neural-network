@@ -1,0 +1,177 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.hpe.ai</groupId>
+    <artifactId>neural-network</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <organization>
+        <name>HPE</name>
+    </organization>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+    </properties>
+
+    <scm>
+        <connection>scm:git:https://github.hpe.com/gabe/neural-network</connection>
+        <developerConnection>scm:git:git@github.hpe.com:gabe/neural-network.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.hpe.com/gabe/neural-network</url>
+    </scm>
+
+    <profiles>
+        <profile>
+            <id>corp-nexus</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>corp.releases</id>
+                    <url>https://repo1.core.hpecorp.net/nexus/content/repositories/releases</url>
+                </repository>
+                <repository>
+                    <id>corp.snapshots</id>
+                    <url>https://repo1.core.hpecorp.net/nexus/content/repositories/snapshots</url>
+                </repository>
+            </repositories>
+            <distributionManagement>
+                <!-- Repository: Storage of RELEASE versions -->
+                <repository>
+                    <id>corp.releases</id>
+                    <name>Internal Releases</name>
+                    <url>https://repo1.core.hpecorp.net/nexus/content/repositories/releases</url>
+                </repository>
+                <!-- Repository: Storage of SNAPSHOT versions -->
+                <snapshotRepository>
+                    <id>corp.snapshots</id>
+                    <name>Internal Snapshots</name>
+                    <url>https://repo1.core.hpecorp.net/nexus/content/repositories/snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.15.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.15.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.15.3</version>
+            </dependency>
+            <!-- loggers -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.36</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.13</version>
+            </dependency>
+            <!-- testing -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.2</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <compilerVersion>${java.version}</compilerVersion>
+                    <verbose>true</verbose>
+                    <!--
+                    <fork>true</fork>
+                    <executable>${JAVA_7_HOME}/bin/javac</executable> - this needs configuration in Maven's settings.xml
+                    see http://maven.apache.org/plugins/maven-compiler-plugin/examples/compile-using-different-jdk.html
+
+                    alternatively use command line options:
+                    -Dmaven.compiler.fork=true and
+                    -Dmaven.compiler.executable=/path/to/target/javac
+                    -->
+                </configuration>
+                <!-- see https://stackoverflow.com/questions/10738609/what-does-supported-source-version-release-5-from-annotation-processor-me -->
+                <executions>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <configuration>
+                            <compilerArgument>-Xlint:-processing</compilerArgument>
+                            <compilerArgument>-proc:none</compilerArgument>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <!-- see https://issues.jenkins-ci.org/browse/JENKINS-27372 -->
+                            <!-- seems to have no effect when checking the jenkins build log
+                            <goal>jar-no-fork</goal>
+                            -->
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+            <!--
+            Note: This sets build related properties such as ${buildNumber}
+            which is set to the Git SHA of the checked out project
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
