@@ -5,65 +5,68 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Converted to java from <a href="https://dev.to/farshed/building-a-neural-network-in-rust-from-scratch-5bm1">Building a Neural Network in Rust (From Scratch)</a>
- *
- * @author Gabriel Inäbnit - 2024-02-28
+ * @author Gabriel Inäbnit - 2024-04-01
  */
 public class NeuralNetwork
 {
 
-   private final List<Double> weights = new ArrayList<>();
-   private       double       bias;
+   // each entry represents a layer of nodes
+   private static final List<List<Perceptron>>   layers      = new ArrayList<>();
+   // each entry represents the inputs to each layer's perceptron
+   private static final List<List<List<Double>>> layerInputs = new ArrayList<>();
 
-   public NeuralNetwork()
+   public static NeuralNetwork getInstance()
    {
-      weights.add(Math.random());
-      weights.add(Math.random());
-      bias = Math.random();
+      return Singleton.NEURAL_NETWORK.getInstance();
    }
 
-   public double predict(final List<Double> inputs)
+   /**
+    * Set up the neural network topology. Each entry represents the number of inputs per layer
+    *
+    * @param topology list of input layers with number of inputs each
+    */
+   public void setupNeuralNetwork(final List<Integer> topology)
    {
-      double sum = bias;
-      for (int i = 0; i < 2; i++)
+      for (int i: topology)
       {
-         sum += inputs.get(i) * weights.get(i);
-      }
-      return sigmoid(sum);
-   }
-
-   public void train(final List<List<Double>> inputs, final List<Double> outputs, final int epochs)
-   {
-      double learningRate = 0.1;
-      for (int n = 0; n < epochs; n++)
-      {
-         int i = 0;
-         for (final List<Double> input: inputs)
+         final int perceptrons = i % 2;
+         if (perceptrons > 0)
          {
-            double output = predict(input);
-            double error = outputs.get(i) - output;
-            double delta = derivative(output);
-            int j = 0;
-            for (double weight: weights)
+            final List<Perceptron> layer = new ArrayList<>();
+            for (int n = 0; n < perceptrons; n++)
             {
-               weight += learningRate * error * input.get(j) * delta;
-               weights.set(j, weight);
-               j++;
+               layer.add(new Perceptron(i));
             }
-            bias += learningRate * error * delta;
-            i++;
+            layers.add(layer);
          }
       }
    }
 
-   static double sigmoid(final double x)
+   public double predict(final List<Double> inputs)
    {
-      return 1.0 / (1.0 + Math.exp(-x));
+      final List<List<Double>> layerResults = new ArrayList<>();
+      for (final List<Perceptron> layer: layers)
+      {
+         final List<Double> results = new ArrayList<>(0);
+         for (final Perceptron perceptron: layer)
+         {
+            results.add(perceptron.predict(inputs));
+         }
+         layerResults.add(results);
+      }
+      return 0.0;
    }
 
-   static double derivative(final double x)
+   private enum Singleton
    {
-      return x * (1.0 - x);
+      NEURAL_NETWORK;
+
+      private final NeuralNetwork instance = new NeuralNetwork();
+
+      public NeuralNetwork getInstance()
+      {
+         return instance;
+      }
    }
 
 }
