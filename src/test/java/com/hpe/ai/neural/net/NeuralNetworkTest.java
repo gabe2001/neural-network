@@ -8,14 +8,14 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 /**
- *
  * @author Gabriel Inäbnit - 2024-02-29
  */
-public class PerceptronTest
+public class NeuralNetworkTest
 {
 
    private final ObjectMapper mapper = new ObjectMapper();
@@ -24,23 +24,24 @@ public class PerceptronTest
    public void test_simple_neural_network_two_inputs() throws URISyntaxException, IOException
    {
       final JsonNode jsonNode = mapper.readTree(
-              Objects.requireNonNull(PerceptronTest.class.getResource("/data_two_inputs.json")).toURI().toURL());
-      final Perceptron perceptron = new Perceptron(2);
+              Objects.requireNonNull(NeuralNetworkTest.class.getResource("/data_two_inputs.json")).toURI().toURL());
+      final NeuralNetwork nn = NeuralNetwork.getInstance();
+      nn.setupNeuralNetwork(List.of(2));
       System.out.println("Untrained neural network:");
       final List<List<Double>> inputs = getInputs(jsonNode.get("test_inputs"));
       for (final List<Double> input : inputs)
       {
-         System.out.printf("Input: %.1f + %.1f = %.2f%n", input.get(0), input.get(1), perceptron.predict(input));
+         System.out.printf("Input: %.1f + %.1f = %.2f%n", input.get(0), input.get(1), nn.predict(input));
       }
       System.out.print("Training neural network... ");
       final long start = System.currentTimeMillis();
-      perceptron.train(getInputs(jsonNode.get("training_inputs")), getNumbers(jsonNode.get("training_outputs")), 100000);
+      nn.train(getInputs(jsonNode.get("training_inputs")), getNumbers(jsonNode.get("training_outputs")), 100000);
       final long end = System.currentTimeMillis();
       System.out.printf("done in %d ms%n", end - start);
       System.out.println("Trained neural network:");
       for (final List<Double> input : inputs)
       {
-         System.out.printf("Input: %.1f + %.1f = %.2f%n", input.get(0), input.get(1), perceptron.predict(input));
+         System.out.printf("Input: %.1f + %.1f = %.2f%n", input.get(0), input.get(1), nn.predict(input));
       }
 
    }
@@ -49,24 +50,28 @@ public class PerceptronTest
    public void test_simple_neural_network_three_inputs() throws URISyntaxException, IOException
    {
       final JsonNode jsonNode = mapper.readTree(
-              Objects.requireNonNull(PerceptronTest.class.getResource("/data_three_inputs_generated.json")).toURI().toURL());
-      final Perceptron perceptron = new Perceptron(3);
+              Objects.requireNonNull(NeuralNetworkTest.class.getResource("/data_three_inputs_generated.json")).toURI()
+                      .toURL());
+      final NeuralNetwork nn = NeuralNetwork.getInstance();
+      nn.setupNeuralNetwork(List.of(3));
       System.out.println("Untrained neural network:");
       final List<List<Double>> inputs = getInputs(jsonNode.get("test_inputs"));
       for (final List<Double> input : inputs)
       {
          System.out.printf("Input: %.1f + %.1f + %.1f = %.2f%n", input.get(0), input.get(1), input.get(2),
-                 perceptron.predict(input));
+                 nn.predict(input));
       }
       System.out.print("Training neural network... ");
       final long start = System.currentTimeMillis();
-      perceptron.train(getInputs(jsonNode.get("training_inputs")), getNumbers(jsonNode.get("training_outputs")), 100000);
+      nn.train(getInputs(jsonNode.get("training_inputs")), getNumbers(jsonNode.get("training_outputs")),
+              100000);
       final long end = System.currentTimeMillis();
       System.out.printf("done in %d ms%n", end - start);
       System.out.println("Trained neural network:");
       for (final List<Double> input : inputs)
       {
-         System.out.printf("Input: %.1f + %.1f + %.1f = %.2f%n", input.get(0), input.get(1), input.get(2), perceptron.predict(input));
+         System.out.printf("Input: %.1f + %.1f + %.1f = %.2f%n", input.get(0), input.get(1), input.get(2),
+                 nn.predict(input));
       }
 
    }

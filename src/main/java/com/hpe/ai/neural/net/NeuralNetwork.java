@@ -15,6 +15,8 @@ public class NeuralNetwork
    // each entry represents the inputs to each layer's perceptron
    private static final List<List<List<Double>>> layerInputs = new ArrayList<>();
 
+   private int numberOfLayers;
+
    public static NeuralNetwork getInstance()
    {
       return Singleton.NEURAL_NETWORK.getInstance();
@@ -27,9 +29,10 @@ public class NeuralNetwork
     */
    public void setupNeuralNetwork(final List<Integer> topology)
    {
-      for (int i: topology)
+      numberOfLayers = topology.size();
+      for (int i : topology)
       {
-         final int perceptrons = i % 2;
+         final int perceptrons = i / 2;
          if (perceptrons > 0)
          {
             final List<Perceptron> layer = new ArrayList<>();
@@ -45,16 +48,49 @@ public class NeuralNetwork
    public double predict(final List<Double> inputs)
    {
       final List<List<Double>> layerResults = new ArrayList<>();
-      for (final List<Perceptron> layer: layers)
+      for (final List<Perceptron> layer : layers)
       {
-         final List<Double> results = new ArrayList<>(0);
-         for (final Perceptron perceptron: layer)
+         final List<Double> results = new ArrayList<>();
+         for (final Perceptron perceptron : layer)
          {
             results.add(perceptron.predict(inputs));
          }
          layerResults.add(results);
       }
-      return 0.0;
+      if (numberOfLayers > 1)
+      {
+         return 0.0; // todo
+      }
+      else
+      {
+         return layerResults.getFirst().getFirst();
+      }
+   }
+
+   /**
+    * how are we training a network with multiple layers? it has to be done backwards: expected output back through
+    * the layers all the way to the inputs
+    *
+    * @param inputs  training data
+    * @param outputs expected results
+    * @param epochs  number of repetitions
+    */
+   public void train(final List<List<Double>> inputs, final List<Double> outputs, final int epochs)
+   {
+      for (final List<Perceptron> layer : layers)
+      {
+         for (final Perceptron perceptron : layer)
+         {
+            if (numberOfLayers > 1)
+            {
+               // todo
+            }
+            else
+            {
+               perceptron.train(inputs, outputs, epochs);
+            }
+         }
+      }
    }
 
    private enum Singleton
