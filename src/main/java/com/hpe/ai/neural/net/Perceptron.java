@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Converted to java from <a href="https://dev.to/farshed/building-a-neural-network-in-rust-from-scratch-5bm1">Building a Neural Network in Rust (From Scratch)</a>
+ * Based on the following article:
+ * <a href="https://dev.to/farshed/building-a-neural-network-in-rust-from-scratch-5bm1">Building a Neural Network in Rust (From Scratch)</a>
  *
  * @author Gabriel Inäbnit - 2024-02-28
  */

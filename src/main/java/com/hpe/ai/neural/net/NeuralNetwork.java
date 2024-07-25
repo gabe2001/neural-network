@@ -11,9 +11,9 @@ public class NeuralNetwork
 {
 
    // each entry represents a layer of nodes
-   private static final List<List<Perceptron>>   layers      = new ArrayList<>();
+   private final List<List<Perceptron>>   theNetwork  = new ArrayList<>();
    // each entry represents the inputs to each layer's perceptron
-   private static final List<List<List<Double>>> layerInputs = new ArrayList<>();
+   private final List<List<List<Double>>> layerInputs = new ArrayList<>();
 
    private int numberOfLayers;
 
@@ -24,25 +24,40 @@ public class NeuralNetwork
 
    public void destroy()
    {
-      layers.clear();
+      theNetwork.clear();
       layerInputs.clear();
    }
 
    /**
     * Set up the neural network topology. Each entry represents the number of inputs per layer
+    * <p>
+    * Reconsider this approach:
+    * <ul>
+    *    <li>the number of inputs for each layer is not necessarily the number of perceptrons in the next layer</li>
+    *    <li>the number of perceptrons in the last layer is always 1</li>
+    *    <li>the number of perceptrons in the first layer is always the number of inputs</li>
+    * </ul>
+    * <p>
+    * Say we've got 1 hidden layer with 3 perceptions, 2 inputs and 1 output (implied). The topology would be [2, 3].
+    * <p>
+    * [ "#inputs", "#perceptrons and #inputs", "#perceptrons and #inputs", ... ]
+    * <ol>
+    *    <li>the 2 inputs have to be fed 3 times to each perceptron</li>
+    *    <li>the results have to be collected from these 3 predictions and fed into the 1 output perceptron</li>
+    * </ol>
     *
     * @param topology list of number of inputs for each layer
     */
    public void setupNeuralNetwork(final List<Integer> topology)
    {
       numberOfLayers = topology.size();
-      int currentLayer = 1;
-      for (int i : topology)
+      int currentLayer = 1; // notice, we're not starting at 0!
+      for (int numberOfInputsOfCurrentLayer : topology)
       {
-         int perceptrons; // equals number of outputs of the next layer
+         int perceptrons;
          if (currentLayer < numberOfLayers)
          {
-            perceptrons = topology.get(i); // we're looking ahead
+            perceptrons = topology.get(currentLayer); // remember, we're looking ahead!
          }
          else
          {
@@ -53,29 +68,55 @@ public class NeuralNetwork
             final List<Perceptron> layer = new ArrayList<>();
             for (int n = 0; n < perceptrons; n++)
             {
-               layer.add(new Perceptron(i));
+               layer.add(new Perceptron(numberOfInputsOfCurrentLayer));
             }
-            layers.add(layer);
+            theNetwork.add(layer);
          }
          currentLayer++;
       }
    }
 
+   /**
+    * In a multi-layer network, the prediction has to be done layer by layer. The output of one layer is the input of
+    * the next layer.
+    * <p>
+    * The predictions have to be collected into a list and fed into the next layer.
+    * <p>
+    * If you don't see it, look at the pictures!
+    *
+    * @param inputs list of doubles to predict
+    * @return the prediction
+    */
    public double predict(final List<Double> inputs)
    {
+      // TODO: results array needs to be collected into a list
+      //       is the List<List<Double>> the right data structure?
       final List<List<Double>> layerResults = new ArrayList<>();
-      for (final List<Perceptron> layer : layers)
+//      int layerIndex = 1;
+      for (final List<Perceptron> layer : theNetwork)
       {
-         final List<Double> results = new ArrayList<>();
-         for (final Perceptron perceptron : layer)
-         {
-            results.add(perceptron.predict(inputs));
-         }
-         layerResults.add(results);
+//         if (layerIndex < numberOfLayers)
+//         {
+            // do I need to collect the layerResults?
+            // get next layer's perceptrons
+            final List<Double> results = new ArrayList<>();
+            for (final Perceptron perceptron : layer)
+            {
+               results.add(perceptron.predict(inputs));
+            }
+            layerResults.add(results);
+            // TODO: feed the results into the next layer
+
+//         }
+//         else
+//         {
+//            // TODO: get the last layer's perceptron
+//         }
+//         layerIndex++;
       }
       if (numberOfLayers > 1)
       {
-         return 0.0; // todo
+         return 0.0; // TODO: implement this...
       }
       else
       {
@@ -93,7 +134,7 @@ public class NeuralNetwork
     */
    public void train(final List<List<Double>> inputs, final List<Double> outputs, final int epochs)
    {
-      for (final List<Perceptron> layer : layers)
+      for (final List<Perceptron> layer : theNetwork)
       {
          for (final Perceptron perceptron : layer)
          {

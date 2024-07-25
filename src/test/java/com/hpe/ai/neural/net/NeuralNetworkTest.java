@@ -75,4 +75,27 @@ public class NeuralNetworkTest
       }
    }
 
+   @Test
+   public void test_simple_neural_network_two_layers() throws URISyntaxException, IOException
+   {
+      final JsonNode jsonNode = jsonFromFile("/data_two_inputs.json");
+      nn.setupNeuralNetwork(List.of(2, 3));
+      System.out.println("Untrained neural network:");
+      final List<List<Double>> inputs = getInputs(jsonNode.get("test_inputs"));
+      for (final List<Double> input : inputs)
+      {
+         System.out.printf("Input: %.1f + %.1f = %.2f%n", input.get(0), input.get(1), nn.predict(input));
+      }
+      System.out.print("Training neural network... ");
+      final long start = System.currentTimeMillis();
+      nn.train(getInputs(jsonNode.get("training_inputs")), getNumbers(jsonNode.get("training_outputs")), 100000);
+      final long end = System.currentTimeMillis();
+      System.out.printf("done in %d ms%n", end - start);
+      System.out.println("Trained neural network:");
+      for (final List<Double> input : inputs)
+      {
+         System.out.printf("Input: %.1f + %.1f = %.2f%n", input.get(0), input.get(1), nn.predict(input));
+      }
+   }
+
 }
