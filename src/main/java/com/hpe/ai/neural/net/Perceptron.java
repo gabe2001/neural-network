@@ -40,13 +40,13 @@ public class Perceptron
       for (int n = 0; n < epochs; n++)
       {
          int i = 0;
-         for (final List<Double> input: inputs)
+         for (final List<Double> input : inputs)
          {
             double output = predict(input);
             double error = outputs.get(i) - output;
             double delta = derivative(output);
             int j = 0;
-            for (double weight: weights)
+            for (double weight : weights)
             {
                weight += learningRate * error * input.get(j) * delta;
                weights.set(j, weight);

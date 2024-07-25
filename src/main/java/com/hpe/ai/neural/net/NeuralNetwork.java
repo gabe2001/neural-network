@@ -22,17 +22,32 @@ public class NeuralNetwork
       return Singleton.NEURAL_NETWORK.getInstance();
    }
 
+   public void destroy()
+   {
+      layers.clear();
+      layerInputs.clear();
+   }
+
    /**
     * Set up the neural network topology. Each entry represents the number of inputs per layer
     *
-    * @param topology list of input layers with number of inputs each
+    * @param topology list of number of inputs for each layer
     */
    public void setupNeuralNetwork(final List<Integer> topology)
    {
       numberOfLayers = topology.size();
+      int currentLayer = 1;
       for (int i : topology)
       {
-         final int perceptrons = i / 2;
+         int perceptrons; // equals number of outputs of the next layer
+         if (currentLayer < numberOfLayers)
+         {
+            perceptrons = topology.get(i); // we're looking ahead
+         }
+         else
+         {
+            perceptrons = 1;
+         }
          if (perceptrons > 0)
          {
             final List<Perceptron> layer = new ArrayList<>();
@@ -42,6 +57,7 @@ public class NeuralNetwork
             }
             layers.add(layer);
          }
+         currentLayer++;
       }
    }
 
